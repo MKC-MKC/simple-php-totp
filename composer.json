@@ -1,0 +1,24 @@
+{
+    "name": "haikiri/simple-php-totp",
+    "description": "Simple Php TOTP",
+    "type": "library",
+    "require": {
+        "php": ">=7.0"
+    },
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Haikiri\\SimplePhpTotp\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Haikiri",
+            "email": "haikiri@ya.ru",
+            "homepage": "https://github.com/MKC-MKC/simple-php-totp"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require-dev": {},
+    "scripts": {}
+}
