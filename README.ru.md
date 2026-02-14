@@ -33,3 +33,19 @@ $code = TOTP::generate($secret);
 echo $secret . PHP_EOL; # Секрет для пользователя. (нужно сохранить в БД пользователя)
 echo $code . PHP_EOL; # TOTP-код, с которым мы должны сравнить код переданный пользователем из 2FA-приложения.
 ```
+
+## Получение OTPAuth URL
+
+```php
+<?php
+
+use Haikiri\SimplePhpTotp\TOTP;
+
+$url = TOTP::getTotpUrl(
+    'GJQTCOBSMI2TGZTD', # OTP-секрет (Base32)
+    'user@example.com', # Username / идентификатор клиента
+    'My Service' # Issuer / название организации
+);
+
+echo $url . PHP_EOL; # otpauth://totp/My%20Service:user%40example.com?secret=GJQTCOBSMI2TGZTD&issuer=My%20Service
+```
