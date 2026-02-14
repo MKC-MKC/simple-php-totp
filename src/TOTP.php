@@ -207,6 +207,36 @@ class TOTP
 	}
 
 	/**
+	 * Генерируем ссылку для TOTP-приложений.
+	 * @param string $secret Исходный OTP секрет в формате Base32.
+	 * @param string $username Идентификатор клиента в системе.
+	 * @param string $issuer Название организации/проекта.
+	 * @return string
+	 * @noinspection SpellCheckingInspection
+	 */
+	public static function getTotpUrl(string $secret, string $username, string $issuer): string
+	{
+		# Нормализуем и валидируем обязательные поля.
+		$normalizedSecret = strtoupper(str_replace([' ', '-'], '', trim($secret)));
+		$normalizedUsername = trim($username);
+		$normalizedIssuer = trim($issuer);
+
+		if ($normalizedSecret === '') throw new InvalidArgumentException('Secret string cannot be empty');
+		if ($normalizedUsername === '') throw new InvalidArgumentException('Username cannot be empty');
+		if ($normalizedIssuer === '') throw new InvalidArgumentException('Issuer cannot be empty');
+
+		# Проверяем, что переданный секрет действительно корректный base32.
+		self::decodeSecret($normalizedSecret);
+
+		# Формируем label вида `issuer:username`.
+		$encodedIssuer = rawurlencode($normalizedIssuer);
+		$encodedUsername = rawurlencode($normalizedUsername);
+		$label = "$encodedIssuer:$encodedUsername";
+
+		return 'otpauth://totp/' . $label . '?secret=' . rawurlencode($normalizedSecret) . '&issuer=' . $encodedIssuer;
+	}
+
+	/**
 	 * Избегаем float погрешностей при больших степенях.
 	 * @param int $power
 	 * @return int

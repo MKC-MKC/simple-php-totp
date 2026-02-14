@@ -163,4 +163,53 @@ class TOTPTest extends TestCase
 			'invalid unpadded length remainder' => ['ABC'],
 		];
 	}
+
+	/**
+	 * Проверяем, что ссылка формируется в корректном формате.
+	 * @return void
+	 * @noinspection SpellCheckingInspection
+	 */
+	public static function testGetTotpUrlBuildsExpectedOtpauthLink()
+	{
+		$s = self::MOCK_SECRET;
+		$url = TOTP::getTotpUrl($s, 'user@example.com', 'My Service');
+		self::assertSame("otpauth://totp/My%20Service:user%40example.com?secret=$s&issuer=My%20Service", $url);
+	}
+
+	/**
+	 * Проверяем нормализацию секрета.
+	 * @return void
+	 * @noinspection SpellCheckingInspection
+	 */
+	public static function testGetTotpUrlNormalizesSecret()
+	{
+		$url = TOTP::getTotpUrl(' gjqt-cobs mi2t-gztd ', 'client-1', 'ACME');
+		self::assertStringContainsString('secret=' . self::MOCK_SECRET, $url);
+	}
+
+	/**
+	 * Проверяем, что генерация ссылки с недопустимыми аргументами выбрасывает исключение.
+	 * @dataProvider invalidTotpUrlArgumentsProvider
+	 * @return void
+	 */
+	public function testGetTotpUrlRejectsInvalidArguments(string $secret, string $username, string $issuer)
+	{
+		$this->expectException(InvalidArgumentException::class);
+		TOTP::getTotpUrl($secret, $username, $issuer);
+	}
+
+	/**
+	 * Провайдер невалидных аргументов для формирования ссылки.
+	 * @return array
+	 * @noinspection SpellCheckingInspection
+	 */
+	public static function invalidTotpUrlArgumentsProvider(): array
+	{
+		return [
+			'empty secret' => ['', 'user', 'issuer'],
+			'invalid secret chars' => ['ABCD1', 'user', 'issuer'],
+			'empty username' => [self::MOCK_SECRET, '   ', 'issuer'],
+			'empty issuer' => [self::MOCK_SECRET, 'user', '   '],
+		];
+	}
 }
