@@ -23,6 +23,11 @@
             "Haikiri\\SimplePhpTotp\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Haikiri\\SimplePhpTotp\\Tests\\": "tests/"
+        }
+    },
     "authors": [
         {
             "name": "Haikiri",
