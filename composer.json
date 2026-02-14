@@ -1,6 +1,6 @@
 {
     "name": "haikiri/simple-php-totp",
-    "description": "Simple Php TOTP",
+    "description": "Lightweight PHP TOTP (RFC 6238) and Base32 (RFC 4648) generation/decoding for 2FA authentication",
     "type": "library",
     "require": {
         "php": "^7.0 || >=8.0"
