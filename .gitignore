@@ -1,11 +1,6 @@
 # Project
-*.lock
-var
 vendor
-data
-database
-migrations/*
-config/reference.php
+.phpunit.result.cache
 
 # ---> macOS
 # General
