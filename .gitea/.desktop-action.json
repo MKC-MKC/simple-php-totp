@@ -5,6 +5,11 @@
       "name": "Tests",
       "icon": "bug",
       "command": "php vendor/bin/phpunit tests"
+    },
+    {
+      "name": "Composer Update",
+      "icon": "issueReopened",
+      "command": "COMPOSER_HOME=\"$(mktemp -d)\" composer update"
     }
   ]
 }
