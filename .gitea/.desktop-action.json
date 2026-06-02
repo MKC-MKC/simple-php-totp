@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "actions": [
+    {
+      "name": "Tests",
+      "icon": "bug",
+      "command": "php vendor/bin/phpunit tests"
+    }
+  ]
+}
