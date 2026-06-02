@@ -12,7 +12,7 @@ use PHPUnit\Framework\TestCase;
 class TOTPTest extends TestCase
 {
 	const MOCK_TIME_SLICE = 1234567890;
-	const MOCK_RANDOM_TOKEN = '2a182b53fc';
+	const MOCK_RANDOM_TOKEN = '32613138326235336663';
 	const MOCK_SECRET = 'GJQTCOBSMI2TGZTD';
 	const MOCK_OTP = '046352';
 
@@ -33,6 +33,15 @@ class TOTPTest extends TestCase
 	public static function testDecodeSecretFromKnownSecret()
 	{
 		self::assertSame(self::MOCK_RANDOM_TOKEN, TOTP::decodeSecret(self::MOCK_SECRET));
+	}
+
+	/**
+	 * Проверяем, что декодирование известного секрета возвращает ожидаемый hex-токен.
+	 * @return void
+	 */
+	public static function testDecodeSecretToKnownHexValue()
+	{
+		self::assertSame('303137602ec3306a6008', TOTP::decodeSecret('GAYTOYBOYMYGUYAI'));
 	}
 
 	/**
@@ -74,9 +83,9 @@ class TOTPTest extends TestCase
 	 */
 	public static function testDecodeSecretKeepsNullBytes()
 	{
-		$binary = "A\0B\0C";
-		$secret = TOTP::generateSecret($binary);
-		self::assertSame($binary, TOTP::decodeSecret($secret));
+		$hex = '4100420043';
+		$secret = TOTP::generateSecret($hex);
+		self::assertSame($hex, TOTP::decodeSecret($secret));
 	}
 
 	/**
@@ -86,7 +95,7 @@ class TOTPTest extends TestCase
 	 */
 	public static function testDecodeSecretWithRfcPaddingVariant()
 	{
-		self::assertSame('foo', TOTP::decodeSecret('MZXW6==='));
+		self::assertSame('666f6f', TOTP::decodeSecret('MZXW6==='));
 	}
 
 	/**
@@ -161,6 +170,30 @@ class TOTPTest extends TestCase
 			'padding in the middle' => ['GJQT=COBSMI2TGZTD'],
 			'invalid padding count' => ['MY======='],
 			'invalid unpadded length remainder' => ['ABC'],
+		];
+	}
+
+	/**
+	 * Проверяем, что generateSecret отклоняет не-hex значения.
+	 * @dataProvider invalidHexSeedProvider
+	 * @return void
+	 */
+	public function testGenerateSecretRejectsInvalidHexSeed(string $seed)
+	{
+		$this->expectException(InvalidArgumentException::class);
+		TOTP::generateSecret($seed);
+	}
+
+	/**
+	 * Набор невалидных значений для hex-входа.
+	 * @return array
+	 */
+	public static function invalidHexSeedProvider(): array
+	{
+		return [
+			'odd length hex' => ['abc'],
+			'non-hex symbols' => ['zz11'],
+			'mixed with separator' => ['aa-bb'],
 		];
 	}
 

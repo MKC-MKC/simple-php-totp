@@ -11,12 +11,11 @@ class TOTP
 {
 	/**
 	 * Набор символов RFC4648 base32-алфавита.
-	 * @noinspection SpellCheckingInspection
 	 */
 	const BASE32_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
 
 	# Маппинг для быстрого декодирования символов base32 в их числовые значения.
-	private static $base32Map = null;
+	private static $base32Map;
 
 	/**
 	 * Строит таблицу соответствия base32-символа к числу.
@@ -45,14 +44,19 @@ class TOTP
 	 */
 	public static function generateSecret(string $string = ''): string
 	{
-		if (empty($string)) $string = substr(bin2hex(random_bytes(5)), 0, 10);
+		if (empty($string)) $string = bin2hex(random_bytes(10));
+		if (!ctype_xdigit($string)) throw new InvalidArgumentException('Secret seed must be a hex string');
+		if ((strlen($string) % 2) !== 0) throw new InvalidArgumentException('Hex secret length must be even');
+
+		$binary = hex2bin($string);
+		if ($binary === false) throw new InvalidArgumentException('Invalid hex secret');
 
 		$remainderCount = 0;
 		$remainder = 0;
 		$result = '';
 
-		for ($i = 0; $i < strlen($string); $i++) {
-			$remainder = ($remainder << 8) | ord($string[$i]);
+		for ($i = 0, $iMax = strlen($binary); $i < $iMax; $i++) {
+			$remainder = ($remainder << 8) | ord($binary[$i]);
 			$remainderCount += 8;
 
 			# Извлекаем из буфера по 5 бит и конвертируем в base32 символы.
@@ -86,8 +90,7 @@ class TOTP
 		if (empty($string)) throw new InvalidArgumentException('Secret string cannot be empty');
 
 		# Учитываем пробелы и дефисы от клиента.
-		$input = str_replace([' ', '-'], '', $string);
-		$input = strtoupper($input);
+		$input = strtoupper(str_replace([' ', '-'], '', $string));
 
 		# Допускаем символ '=' только как хвостовой base32-padding.
 		$firstPaddingPos = strpos($input, '=');
@@ -157,7 +160,7 @@ class TOTP
 			throw new InvalidArgumentException('Invalid trailing bits in secret');
 		}
 
-		return $decoded;
+		return bin2hex($decoded);
 	}
 
 	/**
@@ -193,8 +196,11 @@ class TOTP
 		# Упаковываем время в `unsigned long` - `SPACE-padded string`.
 		$timeBytes = pack('N2', 0, $timeValue);
 
+		$secretBytes = hex2bin(self::decodeSecret($secret));
+		if ($secretBytes === false) throw new InvalidArgumentException('Invalid secret');
+
 		# Генерируем Хеш из base32-секрета.
-		$hash = hash_hmac('sha1', $timeBytes, self::decodeSecret($secret), true);
+		$hash = hash_hmac('sha1', $timeBytes, $secretBytes, true);
 
 		# Точка смещения по младшим 4 битам последнего байта.
 		$offset = ord($hash[19]) & 0x0F;
@@ -212,7 +218,6 @@ class TOTP
 	 * @param string $username Идентификатор клиента в системе.
 	 * @param string $issuer Название организации/проекта.
 	 * @return string
-	 * @noinspection SpellCheckingInspection
 	 */
 	public static function getTotpUrl(string $secret, string $username, string $issuer): string
 	{
