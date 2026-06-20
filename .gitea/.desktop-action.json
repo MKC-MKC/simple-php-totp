@@ -9,7 +9,7 @@
     {
       "name": "Composer Update",
       "icon": "issueReopened",
-      "command": "COMPOSER_HOME=\"$(mktemp -d)\" composer update"
+      "command": "composer update"
     }
   ]
 }
