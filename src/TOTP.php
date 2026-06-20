@@ -194,7 +194,7 @@ class TOTP
 		if ($timeValue < 0) throw new InvalidArgumentException('Time must be greater than or equal to 0');
 
 		# Упаковываем время в `unsigned long` - `SPACE-padded string`.
-		$timeBytes = pack('N2', 0, $timeValue);
+		$timeBytes = pack('J', $timeValue);
 
 		$secretBytes = hex2bin(self::decodeSecret($secret));
 		if ($secretBytes === false) throw new InvalidArgumentException('Invalid secret');
