@@ -209,7 +209,7 @@ class TOTP
 		$binary = $binaryParts[1] & 0x7FFFFFFF;
 
 		# Дополняем токен нулями слева до нужной длины.
-		return str_pad((string)($binary % self::pow($otp_length)), $otp_length, '0', STR_PAD_LEFT);
+		return str_pad((string)($binary % (10 ** $otp_length)), $otp_length, '0', STR_PAD_LEFT);
 	}
 
 	/**
@@ -239,17 +239,5 @@ class TOTP
 		$label = "$encodedIssuer:$encodedUsername";
 
 		return 'otpauth://totp/' . $label . '?secret=' . rawurlencode($normalizedSecret) . '&issuer=' . $encodedIssuer;
-	}
-
-	/**
-	 * Избегаем float погрешностей при больших степенях.
-	 * @param int $power
-	 * @return int
-	 */
-	private static function pow(int $power): int
-	{
-		$value = 1;
-		for ($i = 0; $i < $power; $i++) $value *= 10;
-		return $value;
 	}
 }
